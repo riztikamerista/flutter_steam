@@ -233,6 +233,14 @@ class _LibraryPageState extends State<LibraryPage> {
   }
 
   Widget _buildBottomNavigationBar() {
+    final List<Map<String, dynamic>> navItems = [
+      {'icon': Icons.home}, // Index 0: Home
+      {'icon': Icons.widgets_outlined}, // Index 1: News
+      {'icon': Icons.qr_code_scanner}, // Index 2: Guard (QR)
+      {'icon': Icons.chat_bubble_outline}, // Index 3: Community (Chat)
+      {'icon': Icons.shield_outlined}, // Index 4: Library ← KITA ADA DI SINI
+    ];
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF171A21),
@@ -249,28 +257,24 @@ class _LibraryPageState extends State<LibraryPage> {
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white54,
         type: BottomNavigationBarType.fixed,
-        currentIndex: 1,
+        currentIndex: 4, // LIBRARY ADA DI INDEX 4 (urutan kedua dari kanan)
         onTap: (index) {
           if (index == 0) {
+            // KE HOME - Pop back
             Navigator.pop(context);
           }
+          // Tambahkan navigasi lain jika diperlukan
+          // Index 1 = News
+          // Index 2 = Guard
+          // Index 3 = Community
+          // Index 4 = Library (current page, no action needed)
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.widgets_outlined),
-            label: '',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.qr_code_scanner), label: ''),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            label: '',
-          ),
-        ],
+        items: navItems
+            .map(
+              (item) =>
+                  BottomNavigationBarItem(icon: Icon(item['icon']), label: ''),
+            )
+            .toList(),
       ),
     );
   }

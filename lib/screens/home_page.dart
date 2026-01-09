@@ -596,8 +596,8 @@ class _HomePageState extends State<HomePage> {
       {'icon': Icons.home}, // Index 0: Home
       {'icon': Icons.widgets_outlined}, // Index 1: News
       {'icon': Icons.qr_code_scanner}, // Index 2: Guard (QR)
-      {'icon': Icons.shield_outlined}, // Index 3: Library
-      {'icon': Icons.chat_bubble_outline}, // Index 4: Community (Chat)
+      {'icon': Icons.chat_bubble_outline}, // Index 3: Community (Chat)
+      {'icon': Icons.shield_outlined}, // Index 4: Library
     ];
 
     return Container(
@@ -625,19 +625,19 @@ class _HomePageState extends State<HomePage> {
               MaterialPageRoute(builder: (context) => const NewsPage()),
             );
           } else if (index == 2) {
-            // KE GUARD (Memanggil QRScannerPage sesuai file guard.dart kamu)
+            // KE GUARD (QR Scanner)
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const QRScannerPage()),
             );
-          } else if (index == 3) {
-            // KE LIBRARY
+          } else if (index == 4) {
+            // KE LIBRARY - SEKARANG INDEX 4
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const LibraryPage()),
             );
           }
-          // Tambahkan logika untuk index 4 jika CommunityPage sudah ada
+          // Index 3 untuk Community/Chat page (belum diimplementasi)
         },
         items: navItems
             .map(
