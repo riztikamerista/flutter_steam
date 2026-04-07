@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart'; // Import HomePage
+import 'package:shared_preferences/shared_preferences.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -17,30 +18,58 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  // Load data yang tersimpan
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('saved_email') ?? '';
+    final savedPassword = prefs.getString('saved_password') ?? '';
+    final rememberMe = prefs.getBool('remember_me') ?? false;
+
+    if (rememberMe) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _passwordController.text = savedPassword;
+        _rememberMe = rememberMe;
+      });
+    }
+  }
+
+  // Simpan data login
+  Future<void> _saveCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setString('saved_email', _emailController.text);
+      await prefs.setString('saved_password', _passwordController.text);
+      await prefs.setBool('remember_me', true);
+    } else {
+      await prefs.remove('saved_email');
+      await prefs.remove('saved_password');
+      await prefs.setBool('remember_me', false);
+    }
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleLogin() {
-    // Print data untuk debugging
-    print('Login pressed');
-    print('Email: ${_emailController.text}');
-    print('Password: ${_passwordController.text}');
-
-    // Navigate to HomePage dan hapus semua route sebelumnya
+  void _handleLogin() async {
+    await _saveCredentials();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const HomePage()),
-      (route) => false, // Hapus semua route sebelumnya
+      (route) => false,
     );
   }
 
   void _handleSocialLogin(String provider) {
-    print('$provider login pressed');
-
-    // Langsung masuk ke HomePage
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const HomePage()),
@@ -59,17 +88,13 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back Button
                 IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
-
                 const SizedBox(height: 32),
-
-                // Title
                 const Text(
                   'Go ahead and set up\nyou account',
                   style: TextStyle(
@@ -79,37 +104,22 @@ class _LoginPageState extends State<LoginPage> {
                     height: 1.3,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
-                // Subtitle
                 const Text(
                   'Sign in-up to enjoy the best managing experience',
                   style: TextStyle(color: Colors.white60, fontSize: 14),
                 ),
-
                 const SizedBox(height: 32),
-
-                // Login/Register Toggle
                 _buildToggleButtons(),
-
                 const SizedBox(height: 32),
-
-                // Email Field
                 _buildTextField(
                   controller: _emailController,
                   label: 'Email address',
                   icon: Icons.email_outlined,
                 ),
-
                 const SizedBox(height: 16),
-
-                // Password Field
                 _buildPasswordField(),
-
                 const SizedBox(height: 16),
-
-                // Remember Me & Forgot Password
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -125,9 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                                 _rememberMe = value ?? false;
                               });
                             },
-                            fillColor: MaterialStateProperty.resolveWith((
-                              states,
-                            ) {
+                            fillColor: MaterialStateProperty.resolveWith((states) {
                               if (states.contains(MaterialState.selected)) {
                                 return Colors.blue;
                               }
@@ -144,9 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                     TextButton(
-                      onPressed: () {
-                        print('Forgot Password pressed');
-                      },
+                      onPressed: () {},
                       child: const Text(
                         'Forgot Password?',
                         style: TextStyle(color: Colors.white70, fontSize: 13),
@@ -154,10 +160,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
-
-                // Login Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -179,20 +182,14 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                // Or login with
                 const Center(
                   child: Text(
                     'Or login with',
                     style: TextStyle(color: Colors.white60, fontSize: 13),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // Social Login Buttons
                 Row(
                   children: [
                     Expanded(
@@ -231,52 +228,32 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isLoginSelected = true;
-                });
-              },
+              onTap: () => setState(() => _isLoginSelected = true),
               child: Container(
                 decoration: BoxDecoration(
-                  color: _isLoginSelected
-                      ? const Color(0xFF2A475E)
-                      : Colors.transparent,
+                  color: _isLoginSelected ? const Color(0xFF2A475E) : Colors.transparent,
                   borderRadius: BorderRadius.circular(25),
                 ),
                 alignment: Alignment.center,
                 child: const Text(
                   'Login',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
           ),
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isLoginSelected = false;
-                });
-              },
+              onTap: () => setState(() => _isLoginSelected = false),
               child: Container(
                 decoration: BoxDecoration(
-                  color: !_isLoginSelected
-                      ? const Color(0xFF2A475E)
-                      : Colors.transparent,
+                  color: !_isLoginSelected ? const Color(0xFF2A475E) : Colors.transparent,
                   borderRadius: BorderRadius.circular(25),
                 ),
                 alignment: Alignment.center,
                 child: const Text(
                   'Register',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -305,10 +282,7 @@ class _LoginPageState extends State<LoginPage> {
           hintText: label,
           hintStyle: const TextStyle(color: Colors.white38, fontSize: 14),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
@@ -326,32 +300,19 @@ class _LoginPageState extends State<LoginPage> {
         obscureText: _obscurePassword,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
-          prefixIcon: const Icon(
-            Icons.lock_outline,
-            color: Colors.white54,
-            size: 20,
-          ),
+          prefixIcon: const Icon(Icons.lock_outline, color: Colors.white54, size: 20),
           suffixIcon: IconButton(
             icon: Icon(
-              _obscurePassword
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
+              _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
               color: Colors.white54,
               size: 20,
             ),
-            onPressed: () {
-              setState(() {
-                _obscurePassword = !_obscurePassword;
-              });
-            },
+            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
           ),
           hintText: 'Password',
           hintStyle: const TextStyle(color: Colors.white38, fontSize: 14),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
@@ -395,14 +356,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text(label, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
             ],
           ),
         ),
